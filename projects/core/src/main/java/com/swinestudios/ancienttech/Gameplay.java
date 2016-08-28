@@ -19,6 +19,14 @@ public class Gameplay implements GameScreen{
 	public static int ID = 2;
 
 	public boolean paused = false;
+	public boolean gameOver = false;
+
+	//Health for computer
+	public float health;
+	public final float healthX = 20, healthY = 46;
+	public final float maxHealth = 5000; //TODO adjust later
+	public final float healthBarMaxWidth = 600;
+	public final float healthBarHeight = 12;
 
 	public ArrayList<Block> solids;
 	public ArrayList<Projectile> projectiles;
@@ -37,11 +45,11 @@ public class Gameplay implements GameScreen{
 	public void initialise(GameContainer gc){
 		solids = new ArrayList<Block>();
 		bugBlocks = new ArrayList<BugBlock>();
-		
+
 		//Spawn solids
 		solids.add(new Block(10, 10, 16, 64, this));
 		solids.add(new Block(64, 10, 32, 32, this));
-		
+
 		//Spawn bug blocks
 		bugBlocks.add(new BugBlock(40, 60, 320, 8, this));
 	}
@@ -54,22 +62,26 @@ public class Gameplay implements GameScreen{
 	@Override
 	public void postTransitionOut(Transition t){
 		paused = false;
+		gameOver = false;
 	}
 
 	@Override
 	public void preTransitionIn(Transition t){
+		health = maxHealth;
+
 		paused = false;
+		gameOver = false;
 		projectiles = new ArrayList<Projectile>();
 		bugs = new ArrayList<Bug>();
 		spawner = new BugSpawner(this);
-		
+
 		player = new Player(16, 200, this);
 		Gdx.input.setInputProcessor(player);
 	}
 
 	@Override
 	public void preTransitionOut(Transition t){
-		
+
 	}
 
 	@Override
@@ -87,26 +99,56 @@ public class Gameplay implements GameScreen{
 		renderBugs(g);
 		renderProjectiles(g);
 
+		//Draw health bar for computer
+		g.setColor(Color.RED);
+		//int mx = Gdx.input.getX();
+		//int my = Gdx.input.getY();
+		//System.out.println(mx + ", " + my);
+		g.fillRect(healthX, healthY, healthBarMaxWidth, healthBarHeight);
+		g.setColor(Color.GREEN);
+		g.fillRect(healthX, healthY, healthBarMaxWidth * (health / maxHealth), healthBarHeight);
+
 		if(paused){
 			g.setColor(Color.RED);
 			g.drawString("Are you sure you want to quit? Y or N", 220, 240);
+		}
+		if(gameOver){
+			g.setColor(Color.RED);
+			g.drawString("Game over! Press Escape to go back to the main menu", 160, 240);
 		}
 	}
 
 	@Override
 	public void update(GameContainer gc, ScreenManager<? extends GameScreen> sm, float delta){
-		if(!paused){
+		if(!paused && !gameOver){
 			player.update(delta);
 			updateBugs(delta);
 			updateProjectiles(delta);
 			spawner.update(delta);
+
+			if(player.bugCount > 0){
+				health -= 5;
+			}
+			else{
+				if(health + 1 <= maxHealth){
+					health++;
+				}
+			}
+			if(health <= 0){
+				gameOver = true;
+			}
 
 			if(Gdx.input.isKeyPressed(Keys.ESCAPE)){
 				paused = true;
 			}
 		}
 		else{
-			if(paused){
+			if(gameOver){
+				if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
+					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
+				}
+			}
+			else if(paused){
 				if(Gdx.input.isKeyJustPressed(Keys.Y)){
 					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
 				}
@@ -116,7 +158,7 @@ public class Gameplay implements GameScreen{
 			}
 		}
 	}
-	
+
 	public void renderBugs(Graphics g){
 		for(int i = 0; i < bugs.size(); i++){
 			bugs.get(i).render(g);
@@ -128,7 +170,7 @@ public class Gameplay implements GameScreen{
 			bugs.get(i).update(delta);
 		}
 	}
-	
+
 	public void renderProjectiles(Graphics g){
 		for(int i = 0; i < projectiles.size(); i++){
 			projectiles.get(i).render(g);
@@ -139,7 +181,7 @@ public class Gameplay implements GameScreen{
 		for(int i = 0; i < projectiles.size(); i++){
 			projectiles.get(i).update(delta);
 		}
-}
+	}
 
 	@Override
 	public void interpolate(GameContainer gc, float delta){

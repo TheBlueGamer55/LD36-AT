@@ -1,9 +1,13 @@
 package com.swinestudios.ancienttech;
 
 import org.mini2Dx.core.geom.Rectangle;
+import org.mini2Dx.core.graphics.Animation;
 import org.mini2Dx.core.graphics.Graphics;
+import org.mini2Dx.core.graphics.Sprite;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 
 public class Bug { 
 
@@ -11,10 +15,19 @@ public class Bug {
 	public float velX, velY;
 
 	public boolean isActive;
+	public boolean stuck;
 
 	public boolean isHit;
 	public float hitTimer;
-	public final float maxHitTimer = 1;
+	public final float maxHitTimer = 0.5f;
+
+	public boolean flashing;
+	public float flashTimer;
+	public final float maxFlashTimer = 0.04f;
+
+	public Sprite frame0, frame1, frame2, idle;
+	public Animation<Sprite> bugAnim;
+	public float animationSpeed = 0.05f; //How many seconds a frame lasts
 
 	public Rectangle hitbox;
 	public Gameplay level;
@@ -27,18 +40,43 @@ public class Bug {
 		velY = -0.5f;
 		isActive = true;
 		isHit = false;
+		stuck = false;
+		flashing = false;
 		hitTimer = 0;
 		this.level = level;
 		type = "Bug";
-		hitbox = new Rectangle(x, y, 16, 24); 
+
+		frame0 = new Sprite(new Texture(Gdx.files.internal("moth00.png")));
+		frame1 = new Sprite(new Texture(Gdx.files.internal("moth01.png")));
+		frame2 = new Sprite(new Texture(Gdx.files.internal("moth02.png")));
+		idle = new Sprite(new Texture(Gdx.files.internal("moth_idle.png")));
+		adjustSprite(frame0, frame1, frame2, idle);
+		resizeSprite(frame0, frame1, frame2, idle);
+
+		bugAnim = new Animation<Sprite>();
+		bugAnim.addFrame(frame0, animationSpeed);
+		bugAnim.addFrame(frame1, animationSpeed);
+		bugAnim.addFrame(frame2, animationSpeed);
+		bugAnim.flip(false, true);
+		bugAnim.setLooping(true);
+
+		this.hitbox = new Rectangle(x, y, frame0.getWidth(), frame0.getHeight());
 	}
 
 	public void render(Graphics g){
-		g.setColor(Color.YELLOW);
-		g.fillRect(x, y, hitbox.width, hitbox.height);
-
-		if(isHit){
-			//TODO flash before removed
+		if(!flashing){
+			if(bugAnim != null){
+				if(stuck){
+					g.drawSprite(idle, x, y);
+				}
+				else{
+					bugAnim.draw(g, x, y);
+				}
+			}
+			else{
+				g.setColor(Color.YELLOW);
+				g.fillRect(x, y, hitbox.width, hitbox.height);
+			}
 		}
 	}
 
@@ -50,8 +88,15 @@ public class Bug {
 				isHit = false;
 				level.bugs.remove(this);
 			}
+			
+			flashTimer += delta;
+			if(flashTimer > maxFlashTimer){
+				flashing = !flashing;
+				flashTimer = 0;
+			}
 		}
 		else{
+			bugAnim.update(delta);
 			move();
 			checkProjectileCollision();
 
@@ -120,9 +165,27 @@ public class Bug {
 				}
 				velY = 0;
 				level.player.bugCount++;
+				stuck = true;
 			}
 		}
 		y += velY;
+	}
+
+	public void adjustSprite(Sprite... s){
+		for(int i = 0; i < s.length; i++){
+			if(s != null){
+				s[i].setOrigin(0, 0);
+				//s[i].flip(false, true);
+			}
+		}
+	}
+
+	public void resizeSprite(Sprite... s){
+		for(int i = 0; i < s.length; i++){
+			if(s != null){ //TODO adjust scale?
+				s[i].setSize(s[i].getWidth()*2, s[i].getHeight()*2);
+			}
+		}
 	}
 
 }
