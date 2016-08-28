@@ -6,6 +6,7 @@ import org.mini2Dx.core.graphics.Graphics;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 
 public class Player implements InputProcessor{ 
@@ -18,6 +19,7 @@ public class Player implements InputProcessor{
 
 	public boolean isActive;
 	public boolean facingLeft, facingRight;
+	public boolean walking;
 
 	public Rectangle hitbox;
 	public Gameplay level;
@@ -30,6 +32,8 @@ public class Player implements InputProcessor{
 	public final int RIGHT = Keys.D;
 	public final int UP = Keys.W;
 	public final int DOWN = Keys.S;
+	
+	public static Sound spraySound = Gdx.audio.newSound(Gdx.files.internal("spray1.wav"));
 
 	public Player(float x, float y, Gameplay level){
 		this.x = x;
@@ -40,6 +44,7 @@ public class Player implements InputProcessor{
 		isActive = true;
 		facingRight = true;
 		facingLeft = false;
+		walking = false;
 		this.level = level;
 		type = "Player";
 		hitbox = new Rectangle(x, y, 20, 20); 
@@ -52,6 +57,19 @@ public class Player implements InputProcessor{
 
 	public void update(float delta){
 		playerMovement();
+		
+		if(velX != 0 || velY != 0){
+			if(!walking){
+				walking = true;
+				//TODO resume music
+			}
+		}
+		else{
+			if(walking){
+				walking = false;
+				//TODO pause music
+			}
+		}
 		
 		//Stop x-movement if not pressing LEFT nor RIGHT
 		if(!Gdx.input.isKeyPressed(this.LEFT) && !Gdx.input.isKeyPressed(this.RIGHT)){
@@ -156,6 +174,7 @@ public class Player implements InputProcessor{
 	}
 	
 	public void attack(){
+		spraySound.play();
 		if(facingLeft){
 			Projectile spray = new Projectile(this.x - 4, this.y, -1, level);
 			level.projectiles.add(spray);

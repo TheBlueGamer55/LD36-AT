@@ -6,6 +6,7 @@ import org.mini2Dx.core.graphics.Graphics;
 import org.mini2Dx.core.graphics.Sprite;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 
@@ -32,6 +33,8 @@ public class Bug {
 	public Rectangle hitbox;
 	public Gameplay level;
 	public String type;
+	
+	public static Sound dieSound = Gdx.audio.newSound(Gdx.files.internal("bug_die.wav"));
 
 	public Bug(float x, float y, Gameplay level){
 		this.x = x;
@@ -111,6 +114,7 @@ public class Bug {
 			if(temp != null && temp.isActive){
 				if(isColliding(temp.hitbox, this.x, this.y)){ //If there is a collision
 					isHit = true;
+					dieSound.play(0.6f);
 					//Decrement if this was an idle bug
 					if(velY == 0){
 						level.player.bugCount--;
@@ -182,7 +186,7 @@ public class Bug {
 
 	public void resizeSprite(Sprite... s){
 		for(int i = 0; i < s.length; i++){
-			if(s != null){ //TODO adjust scale?
+			if(s != null){ 
 				s[i].setSize(s[i].getWidth()*2, s[i].getHeight()*2);
 			}
 		}

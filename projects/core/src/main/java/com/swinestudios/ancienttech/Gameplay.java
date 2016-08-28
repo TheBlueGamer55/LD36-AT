@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.mini2Dx.core.game.GameContainer;
 import org.mini2Dx.core.graphics.Graphics;
+import org.mini2Dx.core.graphics.Sprite;
 import org.mini2Dx.core.screen.GameScreen;
 import org.mini2Dx.core.screen.ScreenManager;
 import org.mini2Dx.core.screen.Transition;
@@ -12,7 +13,10 @@ import org.mini2Dx.core.screen.transition.FadeOutTransition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 
 public class Gameplay implements GameScreen{
 
@@ -23,7 +27,7 @@ public class Gameplay implements GameScreen{
 
 	//Health for computer
 	public float health;
-	public final float healthX = 20, healthY = 46;
+	public final float healthX = 20, healthY = 480 - 46;
 	public final float maxHealth = 5000; //TODO adjust later
 	public final float healthBarMaxWidth = 600;
 	public final float healthBarHeight = 12;
@@ -33,8 +37,14 @@ public class Gameplay implements GameScreen{
 	public ArrayList<BugBlock> bugBlocks;
 	public ArrayList<Bug> bugs;
 	public BugSpawner spawner;
+	
+	public Sprite background;
+	public Sprite pauseMessage, gameOverMessage;
 
 	public Player player;
+	
+	public static Sound pauseSound = Gdx.audio.newSound(Gdx.files.internal("pause2.wav"));
+	public static Music bugsBGM = Gdx.audio.newMusic(Gdx.files.internal("bugsBGM.wav"));
 
 	@Override
 	public int getId(){
@@ -47,11 +57,22 @@ public class Gameplay implements GameScreen{
 		bugBlocks = new ArrayList<BugBlock>();
 
 		//Spawn solids
-		solids.add(new Block(10, 10, 16, 64, this));
-		solids.add(new Block(64, 10, 32, 32, this));
+		solids.add(new Block(0, 387, 640, 8, this)); //Bottom border
+		solids.add(new Block(0, 290, 640, 8, this)); //Top border
+		solids.add(new Block(0, 0, 8, 480, this)); //Left border
+		solids.add(new Block(632, 0, 8, 480, this)); //Right border
 
 		//Spawn bug blocks
-		bugBlocks.add(new BugBlock(40, 60, 320, 8, this));
+		bugBlocks.add(new BugBlock(40, 200, 500, 8, this));
+		
+		pauseMessage = new Sprite(new Texture(Gdx.files.internal("pause_quit_text.png")));
+		pauseMessage.scale(1);
+		gameOverMessage = new Sprite(new Texture(Gdx.files.internal("game_over_text.png")));
+		gameOverMessage.scale(1);
+		
+		background = new Sprite(new Texture(Gdx.files.internal("lab_bg.png")));
+		background.setOrigin(0, 0);
+		background.scale(3);
 	}
 
 	@Override
@@ -63,6 +84,8 @@ public class Gameplay implements GameScreen{
 	public void postTransitionOut(Transition t){
 		paused = false;
 		gameOver = false;
+		bugsBGM.setLooping(false);
+		bugsBGM.stop();
 	}
 
 	@Override
@@ -75,7 +98,7 @@ public class Gameplay implements GameScreen{
 		bugs = new ArrayList<Bug>();
 		spawner = new BugSpawner(this);
 
-		player = new Player(16, 200, this);
+		player = new Player(280, 340, this);
 		Gdx.input.setInputProcessor(player);
 	}
 
@@ -86,6 +109,7 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void render(GameContainer gc, Graphics g){
+		g.drawSprite(background, 0, 0);
 		//Solids rendering TODO remove later
 		for(int i = 0; i < solids.size(); i++){
 			solids.get(i).render(g);
@@ -94,27 +118,30 @@ public class Gameplay implements GameScreen{
 			bugBlocks.get(i).render(g);
 		}
 
-		g.drawString("Bugs: " + player.bugCount, 4, 4);
 		player.render(g);
 		renderBugs(g);
 		renderProjectiles(g);
-
-		//Draw health bar for computer
-		g.setColor(Color.RED);
+		
+		//Debug for placement
 		//int mx = Gdx.input.getX();
 		//int my = Gdx.input.getY();
 		//System.out.println(mx + ", " + my);
+
+		//Draw health bar for computer
+		g.setColor(Color.RED);
 		g.fillRect(healthX, healthY, healthBarMaxWidth, healthBarHeight);
 		g.setColor(Color.GREEN);
 		g.fillRect(healthX, healthY, healthBarMaxWidth * (health / maxHealth), healthBarHeight);
 
 		if(paused){
-			g.setColor(Color.RED);
-			g.drawString("Are you sure you want to quit? Y or N", 220, 240);
+			//g.setColor(Color.RED);
+			//g.drawString("Are you sure you want to quit? Y or N", 220, 240);
+			g.drawSprite(pauseMessage, 236, 212);
 		}
 		if(gameOver){
-			g.setColor(Color.RED);
-			g.drawString("Game over! Press Escape to go back to the main menu", 160, 240);
+			//g.setColor(Color.RED);
+			//g.drawString("Game over! Press Escape to go back to the main menu", 160, 240);
+			g.drawSprite(gameOverMessage, 260, 200);
 		}
 	}
 
@@ -126,19 +153,32 @@ public class Gameplay implements GameScreen{
 			updateProjectiles(delta);
 			spawner.update(delta);
 
+			//Bug damage logic
 			if(player.bugCount > 0){
 				health -= 5;
+				if(!bugsBGM.isLooping()){
+					bugsBGM.setLooping(true);
+					bugsBGM.play();
+				}
 			}
 			else{
 				if(health + 1 <= maxHealth){
 					health++;
+					bugsBGM.setLooping(false);
+					bugsBGM.stop();
 				}
 			}
 			if(health <= 0){
 				gameOver = true;
+				bugsBGM.setLooping(false);
+				bugsBGM.stop();
 			}
 
 			if(Gdx.input.isKeyPressed(Keys.ESCAPE)){
+				if(bugsBGM.isPlaying()){
+					bugsBGM.pause();
+				}
+				pauseSound.play(0.5f);
 				paused = true;
 			}
 		}
@@ -154,6 +194,9 @@ public class Gameplay implements GameScreen{
 				}
 				if(Gdx.input.isKeyJustPressed(Keys.N)){
 					paused = false;
+					if(bugsBGM.isLooping()){ //If bugsBGM was the one that paused
+						bugsBGM.play();
+					}
 				}
 			}
 		}

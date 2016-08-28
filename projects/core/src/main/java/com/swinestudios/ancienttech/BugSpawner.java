@@ -9,7 +9,7 @@ public class BugSpawner{
 	public boolean isActive;
 	
 	//TODO adjust constants later
-	public final float minSpawnX = 16, maxSpawnX = 640; 
+	public final float minSpawnX = 16, maxSpawnX = 600; 
 	
 	public float spawnTimer;
 	public float maxSpawnTimer;
