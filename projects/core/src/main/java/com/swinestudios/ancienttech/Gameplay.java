@@ -86,6 +86,7 @@ public class Gameplay implements GameScreen{
 		gameOver = false;
 		bugsBGM.setLooping(false);
 		bugsBGM.stop();
+		Gdx.input.setInputProcessor(null);
 	}
 
 	@Override

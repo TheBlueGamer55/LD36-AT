@@ -190,7 +190,9 @@ public class Player implements InputProcessor{
 	@Override
 	public boolean keyDown(int keycode) {
 		if(keycode == Keys.SPACE){
-			attack();
+			if(!level.paused && !level.gameOver){
+				attack();
+			}
 		}
 		return false;
 	}
