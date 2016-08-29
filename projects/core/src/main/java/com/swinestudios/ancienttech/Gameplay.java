@@ -8,8 +8,8 @@ import org.mini2Dx.core.graphics.Sprite;
 import org.mini2Dx.core.screen.GameScreen;
 import org.mini2Dx.core.screen.ScreenManager;
 import org.mini2Dx.core.screen.Transition;
-import org.mini2Dx.core.screen.transition.FadeInTransition;
 import org.mini2Dx.core.screen.transition.FadeOutTransition;
+import org.mini2Dx.core.screen.transition.NullTransition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -21,6 +21,9 @@ import com.badlogic.gdx.graphics.Texture;
 public class Gameplay implements GameScreen{
 
 	public static int ID = 2;
+
+	public static int score; 
+	public static int maxScore = 0;
 
 	public boolean paused = false;
 	public boolean gameOver = false;
@@ -37,12 +40,12 @@ public class Gameplay implements GameScreen{
 	public ArrayList<BugBlock> bugBlocks;
 	public ArrayList<Bug> bugs;
 	public BugSpawner spawner;
-	
+
 	public Sprite background;
 	public Sprite pauseMessage, gameOverMessage;
 
 	public Player player;
-	
+
 	public static Sound pauseSound = Gdx.audio.newSound(Gdx.files.internal("pause2.wav"));
 	public static Music bugsBGM = Gdx.audio.newMusic(Gdx.files.internal("bugsBGM.wav"));
 
@@ -58,18 +61,18 @@ public class Gameplay implements GameScreen{
 
 		//Spawn solids
 		solids.add(new Block(0, 387, 640, 8, this)); //Bottom border
-		solids.add(new Block(0, 290, 640, 8, this)); //Top border
+		solids.add(new Block(0, 298, 640, 8, this)); //Top border
 		solids.add(new Block(0, 0, 8, 480, this)); //Left border
 		solids.add(new Block(632, 0, 8, 480, this)); //Right border
 
 		//Spawn bug blocks
 		bugBlocks.add(new BugBlock(40, 200, 500, 8, this));
-		
+
 		pauseMessage = new Sprite(new Texture(Gdx.files.internal("pause_quit_text.png")));
 		pauseMessage.scale(1);
 		gameOverMessage = new Sprite(new Texture(Gdx.files.internal("game_over_text.png")));
 		gameOverMessage.scale(1);
-		
+
 		background = new Sprite(new Texture(Gdx.files.internal("lab_bg.png")));
 		background.setOrigin(0, 0);
 		background.scale(3);
@@ -84,6 +87,7 @@ public class Gameplay implements GameScreen{
 	public void postTransitionOut(Transition t){
 		paused = false;
 		gameOver = false;
+		score = 0;
 		bugsBGM.setLooping(false);
 		bugsBGM.stop();
 		Gdx.input.setInputProcessor(null);
@@ -95,6 +99,7 @@ public class Gameplay implements GameScreen{
 
 		paused = false;
 		gameOver = false;
+		score = 0;
 		projectiles = new ArrayList<Projectile>();
 		bugs = new ArrayList<Bug>();
 		spawner = new BugSpawner(this);
@@ -111,6 +116,23 @@ public class Gameplay implements GameScreen{
 	@Override
 	public void render(GameContainer gc, Graphics g){
 		g.drawSprite(background, 0, 0);
+
+		//Debug for placement
+		//int mx = Gdx.input.getX();
+		//int my = Gdx.input.getY();
+		//System.out.println(mx + ", " + my);
+
+		//Score UI
+		g.setColor(Color.WHITE);
+		g.drawString("Score", 16, 9);
+		//g.drawString("123456789", 15, 43);
+		g.drawString(String.format("%09d", score), 15, 43);
+		//g.drawString("123456789", 456, 43); 
+		g.drawString(String.format("%09d", maxScore), 458, 43);
+		g.setColor(Color.RED);
+		g.drawString("High Score", 458, 9);
+
+
 		//Solids rendering TODO remove later
 		for(int i = 0; i < solids.size(); i++){
 			solids.get(i).render(g);
@@ -122,11 +144,6 @@ public class Gameplay implements GameScreen{
 		player.render(g);
 		renderBugs(g);
 		renderProjectiles(g);
-		
-		//Debug for placement
-		//int mx = Gdx.input.getX();
-		//int my = Gdx.input.getY();
-		//System.out.println(mx + ", " + my);
 
 		//Draw health bar for computer
 		g.setColor(Color.RED);
@@ -175,6 +192,11 @@ public class Gameplay implements GameScreen{
 				bugsBGM.stop();
 			}
 
+			//Update max score
+			if(score > maxScore){
+				maxScore = score;
+			}
+
 			if(Gdx.input.isKeyPressed(Keys.ESCAPE)){
 				if(bugsBGM.isPlaying()){
 					bugsBGM.pause();
@@ -186,12 +208,12 @@ public class Gameplay implements GameScreen{
 		else{
 			if(gameOver){
 				if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
-					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
+					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new NullTransition());
 				}
 			}
 			else if(paused){
 				if(Gdx.input.isKeyJustPressed(Keys.Y)){
-					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
+					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new NullTransition());
 				}
 				if(Gdx.input.isKeyJustPressed(Keys.N)){
 					paused = false;

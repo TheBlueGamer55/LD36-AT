@@ -34,6 +34,8 @@ public class Bug {
 	public Gameplay level;
 	public String type;
 	
+	public final int pointsValue = 25;
+	
 	public static Sound dieSound = Gdx.audio.newSound(Gdx.files.internal("bug_die.wav"));
 
 	public Bug(float x, float y, Gameplay level){
@@ -115,6 +117,7 @@ public class Bug {
 				if(isColliding(temp.hitbox, this.x, this.y)){ //If there is a collision
 					isHit = true;
 					dieSound.play(0.6f);
+					Gameplay.score += this.pointsValue;
 					//Decrement if this was an idle bug
 					if(velY == 0){
 						level.player.bugCount--;
