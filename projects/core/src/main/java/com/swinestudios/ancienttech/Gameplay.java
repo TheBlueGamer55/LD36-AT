@@ -13,7 +13,6 @@ import org.mini2Dx.core.screen.transition.NullTransition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -47,7 +46,10 @@ public class Gameplay implements GameScreen{
 	public Player player;
 
 	public static Sound pauseSound = Gdx.audio.newSound(Gdx.files.internal("pause3.wav"));
-	public static Music bugsBGM = Gdx.audio.newMusic(Gdx.files.internal("bugsBGM.wav"));
+	//public static Music bugsBGM = Gdx.audio.newMusic(Gdx.files.internal("bugsBGM.wav"));
+	public static Sound bugsBGM = Gdx.audio.newSound(Gdx.files.internal("bugsBGM.wav"));
+	public long bugsID;
+	public boolean isBugsLooping;
 
 	@Override
 	public int getId(){
@@ -94,22 +96,21 @@ public class Gameplay implements GameScreen{
 		paused = false;
 		gameOver = false;
 		score = 0;
-		bugsBGM.setLooping(false);
 		bugsBGM.stop();
+		isBugsLooping = false;
 		Gdx.input.setInputProcessor(null);
 	}
 
 	@Override
 	public void preTransitionIn(Transition t){
 		health = maxHealth;
-
 		paused = false;
 		gameOver = false;
+		isBugsLooping = false;
 		score = 0;
 		projectiles = new ArrayList<Projectile>();
 		bugs = new ArrayList<Bug>();
 		spawner = new BugSpawner(this);
-
 		player = new Player(280, 340, this);
 		Gdx.input.setInputProcessor(player);
 	}
@@ -182,21 +183,22 @@ public class Gameplay implements GameScreen{
 			//Bug damage logic
 			if(player.bugCount > 0){
 				health -= 5;
-				if(!bugsBGM.isLooping()){
-					bugsBGM.setLooping(true);
-					bugsBGM.play();
+				if(!isBugsLooping){
+					isBugsLooping = true;
+					
+					bugsID = bugsBGM.loop();
 				}
 			}
 			else{
 				if(health + 1 <= maxHealth){
 					health++;
-					bugsBGM.setLooping(false);
+					isBugsLooping = false;;
 					bugsBGM.stop();
 				}
 			}
 			if(health <= 0){
 				gameOver = true;
-				bugsBGM.setLooping(false);
+				isBugsLooping = false;
 				bugsBGM.stop();
 			}
 
@@ -206,8 +208,9 @@ public class Gameplay implements GameScreen{
 			}
 
 			if(Gdx.input.isKeyPressed(Keys.ESCAPE)){
-				if(bugsBGM.isPlaying()){
-					bugsBGM.pause();
+				if(isBugsLooping){
+					bugsBGM.stop();
+					isBugsLooping = false;
 				}
 				pauseSound.play(0.5f);
 				paused = true;
@@ -227,9 +230,6 @@ public class Gameplay implements GameScreen{
 				}
 				if(Gdx.input.isKeyJustPressed(Keys.N)){
 					paused = false;
-					if(bugsBGM.isLooping()){ //If bugsBGM was the one that paused
-						bugsBGM.play();
-					}
 				}
 			}
 		}

@@ -125,13 +125,11 @@ public class Player implements InputProcessor{
 		if(velX != 0 || velY != 0){
 			if(!walking){
 				walking = true;
-				//TODO resume music
 			}
 		}
 		else{
 			if(walking){
 				walking = false;
-				//TODO pause music
 			}
 		}
 
