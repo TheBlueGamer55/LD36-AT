@@ -115,9 +115,8 @@ public class Player implements InputProcessor{
 				g.drawSprite(playerLeft.getFrame(0), x, y);
 			}
 		}
-		
-		g.setColor(Color.GREEN);
-		g.drawRect(x, y, hitbox.width, hitbox.height);
+		//g.setColor(Color.GREEN);
+		//g.drawRect(x, y, hitbox.width, hitbox.height);
 	}
 
 	public void update(float delta){

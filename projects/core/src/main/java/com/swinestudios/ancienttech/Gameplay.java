@@ -31,7 +31,7 @@ public class Gameplay implements GameScreen{
 	//Health for computer
 	public float health;
 	public final float healthX = 20, healthY = 480 - 46;
-	public final float maxHealth = 5000; //TODO adjust later
+	public final float maxHealth = 5000; 
 	public final float healthBarMaxWidth = 600;
 	public final float healthBarHeight = 12;
 
@@ -66,14 +66,20 @@ public class Gameplay implements GameScreen{
 		solids.add(new Block(632, 0, 8, 480, this)); //Right border
 
 		//Spawn bug blocks
-		bugBlocks.add(new BugBlock(40, 200, 500, 8, this));
+		bugBlocks.add(new BugBlock(8, 248, 110, 4, this));
+		bugBlocks.add(new BugBlock(118, 260, 32, 4, this));
+		bugBlocks.add(new BugBlock(152, 252, 64, 4, this));
+		bugBlocks.add(new BugBlock(214, 270, 136, 4, this));
+		bugBlocks.add(new BugBlock(355, 252, 74, 4, this));
+		bugBlocks.add(new BugBlock(430, 256, 180, 4, this));
+		bugBlocks.add(new BugBlock(609, 272, 32, 4, this));
 
 		pauseMessage = new Sprite(new Texture(Gdx.files.internal("pause_quit_text.png")));
 		pauseMessage.scale(1);
 		gameOverMessage = new Sprite(new Texture(Gdx.files.internal("game_over_text.png")));
 		gameOverMessage.scale(1);
 
-		background = new Sprite(new Texture(Gdx.files.internal("lab_bg.png")));
+		background = new Sprite(new Texture(Gdx.files.internal("lab_bg2.png")));
 		background.setOrigin(0, 0);
 		background.scale(3);
 	}
@@ -121,6 +127,7 @@ public class Gameplay implements GameScreen{
 		//int mx = Gdx.input.getX();
 		//int my = Gdx.input.getY();
 		//System.out.println(mx + ", " + my);
+		//g.drawRect(mx, my, 16, 16);
 
 		//Score UI
 		g.setColor(Color.WHITE);
@@ -133,13 +140,14 @@ public class Gameplay implements GameScreen{
 		g.drawString("High Score", 458, 9);
 
 
-		//Solids rendering TODO remove later
+		//Solids rendering 
+		/*
 		for(int i = 0; i < solids.size(); i++){
 			solids.get(i).render(g);
 		}
 		for(int i = 0; i < bugBlocks.size(); i++){
 			bugBlocks.get(i).render(g);
-		}
+		}*/
 
 		player.render(g);
 		renderBugs(g);

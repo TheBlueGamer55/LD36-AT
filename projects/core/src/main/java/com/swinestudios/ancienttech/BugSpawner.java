@@ -8,16 +8,15 @@ public class BugSpawner{
 
 	public boolean isActive;
 	
-	//TODO adjust constants later
 	public final float minSpawnX = 16, maxSpawnX = 600; 
 	
 	public float spawnTimer;
 	public float maxSpawnTimer;
-	public final float initialSpawnTimer = 1f; //Starting difficulty
+	public final float initialSpawnTimer = 0.75f; //Starting difficulty
 	
 	/*
 	public float difficultyTimer;
-	public final float maxDifficultyTimer = 10f; //Duration of current difficulty TODO adjust later
+	public final float maxDifficultyTimer = 10f; //Duration of current difficulty 
 	public final float difficultyRate = 1f; //How much faster each difficulty gets
 	*/
 
@@ -63,7 +62,7 @@ public class BugSpawner{
 	}
 	
 	public void spawnBug(){
-		float spawnY = 400; //TODO change later
+		float spawnY = 400;
 		float spawnX = random.nextInt((int) ((maxSpawnX - minSpawnX) + 1)) + minSpawnX;
 		
 		Bug bug = new Bug(spawnX, spawnY, level);
