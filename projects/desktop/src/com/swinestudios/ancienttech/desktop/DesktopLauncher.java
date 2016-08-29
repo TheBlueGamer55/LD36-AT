@@ -12,10 +12,10 @@ public class DesktopLauncher {
 		config.vSyncEnabled = true;
 		config.width = 640;
 		config.height = 480;
-		config.resizable = false; 
+		config.resizable = false;
 		config.foregroundFPS = 30;
 		config.backgroundFPS = 30;
-		config.title = "TO BE NAMED";
+		config.title = "Mark the Debugger";
 		new DesktopMini2DxGame(new AncientTechGame(), config);
 	}
 }

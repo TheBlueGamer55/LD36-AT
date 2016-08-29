@@ -46,7 +46,7 @@ public class Gameplay implements GameScreen{
 
 	public Player player;
 
-	public static Sound pauseSound = Gdx.audio.newSound(Gdx.files.internal("pause2.wav"));
+	public static Sound pauseSound = Gdx.audio.newSound(Gdx.files.internal("pause3.wav"));
 	public static Music bugsBGM = Gdx.audio.newMusic(Gdx.files.internal("bugsBGM.wav"));
 
 	@Override
@@ -216,11 +216,13 @@ public class Gameplay implements GameScreen{
 		else{
 			if(gameOver){
 				if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
+					MainMenu.selectSound.play();
 					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new NullTransition());
 				}
 			}
 			else if(paused){
 				if(Gdx.input.isKeyJustPressed(Keys.Y)){
+					MainMenu.selectSound.play();
 					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new NullTransition());
 				}
 				if(Gdx.input.isKeyJustPressed(Keys.N)){
